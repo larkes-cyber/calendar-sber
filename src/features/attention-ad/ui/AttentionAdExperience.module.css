@@ -117,7 +117,7 @@
   top: -2px;
   left: 50%;
   display: grid;
-  grid-template-columns: 82px 82px;
+  grid-template-columns: 72px 72px;
   place-content: center;
   align-items: center;
   width: 156px;
@@ -138,7 +138,7 @@
 
 .notchExpanded {
   width: min(390px, calc(100vw - 24px));
-  height: 112px;
+  height: 130px;
   padding-top: 10px;
   border-radius: 0 0 34px 34px;
 }
@@ -147,8 +147,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 82px;
-  height: 52px;
+  width: 72px;
+  height: 72px;
   overflow: hidden;
   border: 3px solid #f7f7f1;
   border-radius: 50%;

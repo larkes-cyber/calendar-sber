@@ -62,8 +62,8 @@ const drawEye = (
   const maxY = Math.max(...points.map((point) => point.y));
   const centerX = ((minX + maxX) / 2) * video.videoWidth;
   const centerY = ((minY + maxY) / 2) * video.videoHeight;
-  const sourceWidth = Math.max((maxX - minX) * video.videoWidth * 2.1, 72);
-  const sourceHeight = Math.max((maxY - minY) * video.videoHeight * 3.2, 50);
+  const sourceWidth = Math.max((maxX - minX) * video.videoWidth * 1.5, 52);
+  const sourceHeight = Math.max((maxY - minY) * video.videoHeight * 2.35, 38);
   const context = canvas.getContext('2d');
   if (!context) return;
 
@@ -104,6 +104,8 @@ export function AttentionAdExperience({ children }: Props) {
   const rightEyeRef = useRef<HTMLCanvasElement>(null);
   const modeRef = useRef<AttentionMode>('loading');
   const webgazerStartedRef = useRef(false);
+  const smoothedGazeRef = useRef({ x: 0, y: 0 });
+  const lastAttentiveAtRef = useRef(performance.now());
 
   const changeMode = useCallback((mode: AttentionMode) => {
     modeRef.current = mode;
@@ -203,14 +205,17 @@ export function AttentionAdExperience({ children }: Props) {
       .setRegression('ridge')
       .setGazeListener((data: { x: number; y: number } | null) => {
         if (!data) return;
-        const x = clamp((data.x / window.innerWidth - 0.5) * 2, -1.4, 1.4);
-        const y = clamp((data.y / window.innerHeight - 0.5) * 2, -1.4, 1.4);
+        const rawX = clamp((data.x / window.innerWidth - 0.5) * 2, -1.6, 1.6);
+        const rawY = clamp((data.y / window.innerHeight - 0.5) * 2, -1.6, 1.6);
+        const x = smoothedGazeRef.current.x * 0.78 + rawX * 0.22;
+        const y = smoothedGazeRef.current.y * 0.78 + rawY * 0.22;
+        smoothedGazeRef.current = { x, y };
         setGaze({ x, y });
+        const predictionIsOnScreen = Math.abs(x) < 1.18 && Math.abs(y) < 1.2;
+        if (predictionIsOnScreen) lastAttentiveAtRef.current = performance.now();
         setIsWatching(
           document.visibilityState === 'visible' &&
-            document.hasFocus() &&
-            Math.abs(x) < 0.78 &&
-            Math.abs(y) < 0.82
+            (predictionIsOnScreen || performance.now() - lastAttentiveAtRef.current < 1100)
         );
       });
 
@@ -255,8 +260,8 @@ export function AttentionAdExperience({ children }: Props) {
         const [landmarks] = faceLandmarker.detectForVideo(video, time).faceLandmarks;
         if (landmarks?.length >= 478) {
           misses = 0;
-          drawEye(leftEyeRef.current, video, landmarks, [33, 133, 159, 145, 158, 153]);
-          drawEye(rightEyeRef.current, video, landmarks, [362, 263, 386, 374, 385, 380]);
+          drawEye(leftEyeRef.current, video, landmarks, [362, 263, 386, 374, 385, 380]);
+          drawEye(rightEyeRef.current, video, landmarks, [33, 133, 159, 145, 158, 153]);
           if (modeRef.current !== 'webgazer') {
             const leftIris = averageLandmarks(landmarks, [468, 469, 470, 471, 472]);
             const rightIris = averageLandmarks(landmarks, [473, 474, 475, 476, 477]);
@@ -279,17 +284,17 @@ export function AttentionAdExperience({ children }: Props) {
             setIsWatching(
               document.visibilityState === 'visible' &&
                 document.hasFocus() &&
-                faceCenter.x > 0.2 &&
-                faceCenter.x < 0.8 &&
-                faceCenter.y > 0.16 &&
-                faceCenter.y < 0.86 &&
-                Math.abs(gazeX) < 0.82 &&
-                Math.abs(gazeY) < 0.88
+                faceCenter.x > 0.12 &&
+                faceCenter.x < 0.88 &&
+                faceCenter.y > 0.1 &&
+                faceCenter.y < 0.92 &&
+                Math.abs(gazeX) < 0.96 &&
+                Math.abs(gazeY) < 0.96
             );
           }
         } else if (modeRef.current !== 'webgazer') {
           misses += 1;
-          if (misses > 2) setIsWatching(false);
+          if (misses > 10) setIsWatching(false);
         }
       }
       animationFrame = requestAnimationFrame(renderEyes);
@@ -331,7 +336,7 @@ export function AttentionAdExperience({ children }: Props) {
       const x = clamp((event.clientX / window.innerWidth - 0.5) * 2, -1, 1);
       const y = clamp((event.clientY / window.innerHeight - 0.5) * 2, -1, 1);
       setGaze({ x, y });
-      setIsWatching(Math.abs(x) < 0.82 && Math.abs(y) < 0.82);
+      setIsWatching(Math.abs(x) < 0.95 && Math.abs(y) < 0.95);
     };
     window.addEventListener('pointermove', update);
     return () => window.removeEventListener('pointermove', update);
@@ -443,11 +448,11 @@ export function AttentionAdExperience({ children }: Props) {
         <div className={`${styles.notch} ${styles.notchExpanded}`}>
           <div className={styles.cameraDot} data-active={cameraState === 'ready'} />
           <div className={styles.eye} aria-hidden="true">
-            <canvas height="60" ref={leftEyeRef} width="82" />
+            <canvas height="72" ref={leftEyeRef} width="72" />
             {cameraState !== 'ready' && <span className={styles.eyePlaceholder} />}
           </div>
           <div className={styles.eye} aria-hidden="true">
-            <canvas height="60" ref={rightEyeRef} width="82" />
+            <canvas height="72" ref={rightEyeRef} width="72" />
             {cameraState !== 'ready' && <span className={styles.eyePlaceholder} />}
           </div>
           <span className={styles.notchStatus}>
