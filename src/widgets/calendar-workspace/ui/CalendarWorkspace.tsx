@@ -3,7 +3,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import type { DateSelectArg, DatesSetArg, DayCellMountArg, EventClickArg } from '@fullcalendar/core';
+import type { DateSelectArg, DatesSetArg, DayCellMountArg } from '@fullcalendar/core';
 import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,7 +37,6 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
   const calendarRef = useRef<FullCalendar>(null);
   const dayCellCleanups = useRef(new WeakMap<HTMLElement, () => void>());
   const [events, setEvents] = useState<CalendarEvent[]>(mockEvents);
-  const [selectedEventId, setSelectedEventId] = useState(mockEvents[0]?.id ?? null);
   const selectedDate = resolveRouteDate(firstDay);
   const [visibleDate, setVisibleDate] = useState(selectedDate);
   const [calendarTitle, setCalendarTitle] = useState('');
@@ -53,14 +52,8 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
     [events]
   );
 
-  const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
-
   const handleViewChange = (nextView: CalendarRouteView) => {
     navigate(`/${nextView}/${visibleDate}`);
-  };
-
-  const handleEventClick = (click: EventClickArg) => {
-    setSelectedEventId(click.event.id);
   };
 
   const handleDatesSet = (dateInfo: DatesSetArg) => {
@@ -203,7 +196,6 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
     };
 
     setEvents((current) => [...current, event]);
-    setSelectedEventId(id);
     closeEventModal();
   };
 
@@ -217,7 +209,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
       <div className={styles.workspace}>
         <div className={styles.sidebar}>
           <CalendarSidebar calendars={mockCalendars} />
-          <EventDetails event={selectedEvent} />
+          <EventDetails />
         </div>
         <div className={styles.content}>
           <div className={styles.toolbar}>
@@ -248,7 +240,6 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
             dayCellWillUnmount={unmountDayTimeSelector}
               dayMaxEvents={3}
               displayEventTime={false}
-              eventClick={handleEventClick}
               events={calendarEvents}
               firstDay={1}
               headerToolbar={false}

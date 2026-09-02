@@ -1,8 +1,5 @@
 .root {
-  display: grid;
-  grid-template-columns: 276px minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
+  display: block;
 }
 
 .workspace {
@@ -17,6 +14,16 @@
   display: grid;
   gap: 16px;
   min-width: 0;
+}
+
+.sidebar {
+  position: relative;
+  z-index: 2;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
 }
 
 .toolbar {
@@ -137,12 +144,6 @@
 @media (max-width: 1280px) {
   .workspace {
     grid-template-columns: 190px minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 1180px) {
-  .root {
-    grid-template-columns: 1fr;
   }
 }
 

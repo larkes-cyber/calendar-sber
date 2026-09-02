@@ -1,71 +1,66 @@
-import type { CalendarEvent } from '../model/types';
-
 import styles from './EventDetails.module.css';
 
-type EventDetailsProps = {
-  event: CalendarEvent | null;
-};
-
-const statusLabel = {
-  planned: 'Запланировано',
-  confirmed: 'Подтверждено',
-  done: 'Завершено'
-};
-
-export function EventDetails({ event }: EventDetailsProps) {
-  if (!event) {
-    return (
-      <aside className={styles.root}>
-        <p className={styles.empty}>Выберите событие в календаре.</p>
-      </aside>
-    );
+const importantMeetings = [
+  {
+    badge: 'ОБЯЗАТЕЛЬНО',
+    date: '3 сентября',
+    time: '10:00–11:30',
+    title: 'Планирование спринта',
+    meta: 'Вся команда · Zoom',
+    tone: 'yellow'
+  },
+  {
+    badge: 'НЕ ПРОПУСТИТЬ',
+    date: '4 сентября',
+    time: '12:00–13:00',
+    title: 'Груминг бэклога',
+    meta: 'Product + Dev · Переговорка 4',
+    tone: 'pink'
+  },
+  {
+    badge: 'СРОЧНО',
+    date: '5 сентября',
+    time: '16:00–17:00',
+    title: 'Ретро спринта',
+    meta: 'Вся команда · Zoom',
+    tone: 'blue'
+  },
+  {
+    badge: 'ВАЖНО',
+    date: '8 сентября',
+    time: '11:00–12:00',
+    title: 'Демо для стейкхолдеров',
+    meta: 'Product + Business · Большой зал',
+    tone: 'orange'
   }
+] as const;
 
+export function EventDetails() {
   return (
-    <aside className={styles.root}>
-      <span className={styles.status}>{statusLabel[event.status]}</span>
-      <h2>{event.title}</h2>
-      <dl className={styles.meta}>
+    <aside className={styles.root} aria-labelledby="important-meetings-title">
+      <div className={styles.heading}>
+        <span className={styles.alertIcon} aria-hidden="true">
+          !
+        </span>
         <div>
-          <dt>Начало</dt>
-          <dd>{formatDateTime(event.startsAt)}</dd>
+          <span className={styles.eyebrow}>Внимание</span>
+          <h2 id="important-meetings-title">Важные встречи</h2>
         </div>
-        <div>
-          <dt>Окончание</dt>
-          <dd>{formatDateTime(event.endsAt)}</dd>
-        </div>
-        <div>
-          <dt>Владелец</dt>
-          <dd>{event.owner}</dd>
-        </div>
-        {event.location ? (
-          <div>
-            <dt>Место</dt>
-            <dd>{event.location}</dd>
-          </div>
-        ) : null}
-        {event.attendees?.length ? (
-          <div>
-            <dt>Участники</dt>
-            <dd>{event.attendees.join(', ')}</dd>
-          </div>
-        ) : null}
-      </dl>
-      {event.videoMeetingUrl ? (
-        <a className={styles.videoLink} href={event.videoMeetingUrl} rel="noreferrer" target="_blank">
-          Подключиться к видеовстрече
-        </a>
-      ) : null}
-      {event.description ? <p className={styles.description}>{event.description}</p> : null}
+      </div>
+
+      <ul className={styles.list}>
+        {importantMeetings.map((meeting) => (
+          <li className={`${styles.meeting} ${styles[meeting.tone]}`} key={meeting.title}>
+            <div className={styles.meetingTopline}>
+              <span className={styles.badge}>{meeting.badge}</span>
+              <span className={styles.date}>{meeting.date}</span>
+            </div>
+            <strong>{meeting.title}</strong>
+            <span className={styles.time}>{meeting.time}</span>
+            <span className={styles.meta}>{meeting.meta}</span>
+          </li>
+        ))}
+      </ul>
     </aside>
   );
-}
-
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(value));
 }
