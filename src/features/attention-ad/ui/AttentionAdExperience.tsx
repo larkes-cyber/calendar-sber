@@ -9,6 +9,8 @@ import {
   type ReactNode
 } from 'react';
 
+import { AttentionAdContext } from '../model/attentionAdContext';
+
 import styles from './AttentionAdExperience.module.css';
 
 type Props = { children: ReactNode };
@@ -36,6 +38,8 @@ const calibrationPoints = [
   { x: 50, y: 82 },
   { x: 86, y: 82 }
 ];
+
+const adWatchDurationMs = 7000;
 
 const clamp = (value: number, minimum: number, maximum: number) =>
   Math.min(maximum, Math.max(minimum, value));
@@ -106,6 +110,7 @@ export function AttentionAdExperience({ children }: Props) {
   const webgazerStartedRef = useRef(false);
   const smoothedGazeRef = useRef({ x: 0, y: 0 });
   const lastAttentiveAtRef = useRef(performance.now());
+  const buttonClickCountRef = useRef(0);
 
   const changeMode = useCallback((mode: AttentionMode) => {
     modeRef.current = mode;
@@ -211,11 +216,11 @@ export function AttentionAdExperience({ children }: Props) {
         const y = smoothedGazeRef.current.y * 0.78 + rawY * 0.22;
         smoothedGazeRef.current = { x, y };
         setGaze({ x, y });
-        const predictionIsOnScreen = Math.abs(x) < 1.18 && Math.abs(y) < 1.2;
+        const predictionIsOnScreen = Math.abs(x) < 1.35 && Math.abs(y) < 1.35;
         if (predictionIsOnScreen) lastAttentiveAtRef.current = performance.now();
         setIsWatching(
           document.visibilityState === 'visible' &&
-            (predictionIsOnScreen || performance.now() - lastAttentiveAtRef.current < 1100)
+            (predictionIsOnScreen || performance.now() - lastAttentiveAtRef.current < 2200)
         );
       });
 
@@ -234,7 +239,7 @@ export function AttentionAdExperience({ children }: Props) {
       .catch(() => startFallbackCamera());
   };
 
-  const trackingActive = phase === 'calibration' || phase === 'advertisement';
+  const trackingActive = phase !== 'gate';
 
   useEffect(() => {
     if (!trackingActive || cameraState !== 'ready') return;
@@ -281,16 +286,17 @@ export function AttentionAdExperience({ children }: Props) {
             );
             const faceCenter = averageLandmarks(landmarks, [1, 4, 9, 152]);
             setGaze({ x: -gazeX, y: gazeY });
-            setIsWatching(
+            const faceIsAttentive =
               document.visibilityState === 'visible' &&
-                document.hasFocus() &&
-                faceCenter.x > 0.12 &&
-                faceCenter.x < 0.88 &&
-                faceCenter.y > 0.1 &&
-                faceCenter.y < 0.92 &&
-                Math.abs(gazeX) < 0.96 &&
-                Math.abs(gazeY) < 0.96
-            );
+              document.hasFocus() &&
+              faceCenter.x > 0.08 &&
+              faceCenter.x < 0.92 &&
+              faceCenter.y > 0.06 &&
+              faceCenter.y < 0.96 &&
+              Math.abs(gazeX) < 0.99 &&
+              Math.abs(gazeY) < 0.99;
+            if (faceIsAttentive) lastAttentiveAtRef.current = performance.now();
+            setIsWatching(faceIsAttentive || performance.now() - lastAttentiveAtRef.current < 2200);
           }
         } else if (modeRef.current !== 'webgazer') {
           misses += 1;
@@ -350,7 +356,9 @@ export function AttentionAdExperience({ children }: Props) {
       const elapsed = Math.min(time - previousTime, 100);
       previousTime = time;
       setProgress((current) =>
-        isWatching ? Math.min(100, current + elapsed / 100) : Math.max(0, current - elapsed / 42)
+        isWatching
+          ? Math.min(100, current + (elapsed / adWatchDurationMs) * 100)
+          : Math.max(0, current - elapsed / 180)
       );
       animationFrame = requestAnimationFrame(advance);
     };
@@ -366,14 +374,14 @@ export function AttentionAdExperience({ children }: Props) {
       timeout = window.setTimeout(
         () => {
           if (isWatching) {
-            const rollback = 5 + Math.round(Math.random() * 7);
+            const rollback = 1 + Math.round(Math.random() * 2);
             setProgress((current) => Math.max(0, current - rollback));
             setPrankMessage(`Система передумала: −${rollback}%`);
             messageTimeout = window.setTimeout(() => setPrankMessage(''), 1600);
           }
           schedule();
         },
-        2600 + Math.random() * 2300
+        5200 + Math.random() * 2800
       );
     };
     schedule();
@@ -403,12 +411,24 @@ export function AttentionAdExperience({ children }: Props) {
     else setCalibrationStep((current) => current + 1);
   };
 
-  const interruptWithAd = () => {
-    if (phase !== 'finished' || !initialAdStarted) return;
+  const showAdvertisement = useCallback(() => {
+    buttonClickCountRef.current = 0;
     setProgress(0);
     setPrankMessage('');
     setIsWatching(true);
     setPhase('advertisement');
+  }, []);
+
+  const interruptWithAd = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (phase !== 'finished' || !initialAdStarted) return;
+
+    const target = event.target;
+    if (!(target instanceof Element) || !target.closest('button')) return;
+
+    buttonClickCountRef.current += 1;
+    if (buttonClickCountRef.current < 5) return;
+
+    showAdvertisement();
   };
 
   const safeProgress = Number.isFinite(progress) ? progress : 0;
@@ -417,7 +437,10 @@ export function AttentionAdExperience({ children }: Props) {
     Math.floor(safeProgress / (100 / adSlides.length))
   );
   const activeSlide = adSlides[slideIndex] ?? adSlides[0];
-  const secondsRemaining = Math.max(0, Math.ceil((100 - safeProgress) / 10));
+  const secondsRemaining = Math.max(
+    0,
+    Math.ceil(((100 - safeProgress) / 100) * (adWatchDurationMs / 1000))
+  );
   const point = calibrationPoints[calibrationStep];
   const gazeStyle = {
     '--gaze-x': `${gaze.x * 9}px`,
@@ -425,153 +448,157 @@ export function AttentionAdExperience({ children }: Props) {
   } as CSSProperties;
 
   return (
-    <div
-      className={`${styles.experience} ${!isWatching && phase === 'advertisement' ? styles.alarm : ''}`}
-      style={gazeStyle}
-    >
+    <AttentionAdContext.Provider value={showAdvertisement}>
       <div
-        aria-hidden={phase !== 'finished'}
-        inert={phase !== 'finished'}
-        onClickCapture={interruptWithAd}
+        className={`${styles.experience} ${!isWatching && phase === 'advertisement' ? styles.alarm : ''}`}
+        style={gazeStyle}
       >
-        <div className={`${styles.topBanner} ${bannerExpanded ? styles.topBannerExpanded : ''}`}>
-          <img
-            src="/ads/top-transport-banner.png"
-            alt="Поправка 602: снесём транспорт — добавим пробок"
-          />
-        </div>
-        {children}
-      </div>
-      <video className={styles.cameraFeed} muted playsInline ref={videoRef} />
-
-      {trackingActive && (
-        <div className={`${styles.notch} ${styles.notchExpanded}`}>
-          <div className={styles.cameraDot} data-active={cameraState === 'ready'} />
-          <div className={styles.eye} aria-hidden="true">
-            <canvas height="72" ref={leftEyeRef} width="72" />
-            {cameraState !== 'ready' && <span className={styles.eyePlaceholder} />}
-          </div>
-          <div className={styles.eye} aria-hidden="true">
-            <canvas height="72" ref={rightEyeRef} width="72" />
-            {cameraState !== 'ready' && <span className={styles.eyePlaceholder} />}
-          </div>
-          <span className={styles.notchStatus}>
-            {phase === 'calibration'
-              ? 'калибровка взгляда'
-              : isWatching
-                ? 'контакт есть'
-                : 'ГДЕ ГЛАЗА?'}
-          </span>
-        </div>
-      )}
-
-      {phase === 'gate' && (
         <div
-          className={styles.gate}
-          role="dialog"
-          aria-labelledby="attention-gate-title"
-          aria-modal="true"
+          aria-hidden={phase !== 'finished'}
+          inert={phase !== 'finished'}
+          onClickCapture={interruptWithAd}
         >
-          <div className={styles.gateCard}>
-            <span className={styles.gateBadge}>обязательная оптимизация календаря</span>
-            <h1 id="attention-gate-title">Сначала — полный экран. Потом — ваши дела.</h1>
-            <p>
-              Календарю нужен полный экран и камера. После запуска придётся быстро откалибровать
-              взгляд — иначе реклама обидится.
-            </p>
-            <button onClick={beginExperience} type="button">
-              Включить экран и камеру
-            </button>
-            <small>Видео и распознавание остаются в вашем браузере.</small>
+          <div className={`${styles.topBanner} ${bannerExpanded ? styles.topBannerExpanded : ''}`}>
+            <img
+              src="/ads/top-transport-banner.png"
+              alt="Поправка 602: снесём транспорт — добавим пробок"
+            />
           </div>
+          {children}
         </div>
-      )}
+        <video className={styles.cameraFeed} muted playsInline ref={videoRef} />
 
-      {phase === 'calibration' && (
-        <div
-          className={styles.calibration}
-          role="dialog"
-          aria-labelledby="calibration-title"
-          aria-modal="true"
-        >
-          <div className={styles.calibrationCopy}>
-            <strong id="calibration-title">
-              {attentionMode === 'webgazer'
-                ? 'Смотрите на мишень и нажмите 3 раза'
-                : 'Настраиваем слежение…'}
-            </strong>
-            <span>
-              {attentionMode === 'webgazer'
-                ? `Точка ${calibrationStep + 1} из ${calibrationPoints.length}`
-                : 'Не двигайтесь. Камера думает.'}
+        {trackingActive && (
+          <div className={`${styles.notch} ${styles.notchExpanded}`}>
+            <div className={styles.cameraDot} data-active={cameraState === 'ready'} />
+            <div className={styles.eye} aria-hidden="true">
+              <canvas height="72" ref={leftEyeRef} width="72" />
+              {cameraState !== 'ready' && <span className={styles.eyePlaceholder} />}
+            </div>
+            <div className={styles.eye} aria-hidden="true">
+              <canvas height="72" ref={rightEyeRef} width="72" />
+              {cameraState !== 'ready' && <span className={styles.eyePlaceholder} />}
+            </div>
+            <span className={styles.notchStatus}>
+              {phase === 'calibration'
+                ? 'калибровка взгляда'
+                : isWatching
+                  ? 'контакт есть'
+                  : 'ГДЕ ГЛАЗА?'}
             </span>
           </div>
-          {attentionMode === 'webgazer' && (
-            <button
-              className={styles.calibrationTarget}
-              onClick={calibrate}
-              style={{ left: `${point.x}%`, top: `${point.y}%` }}
-              type="button"
-              aria-label={`Калибровочная точка ${calibrationStep + 1}, нажатие ${calibrationClicks + 1} из 3`}
-            >
-              <span>{3 - calibrationClicks}</span>
-            </button>
-          )}
-        </div>
-      )}
+        )}
 
-      {phase === 'advertisement' && (
-        <div
-          className={styles.adBackdrop}
-          role="dialog"
-          aria-labelledby="advertisement-title"
-          aria-modal="true"
-        >
-          <section className={styles.adModal}>
-            <header className={styles.modalHeader}>
-              <strong id="advertisement-title">Реклама</strong>
+        {phase === 'gate' && (
+          <div
+            className={styles.gate}
+            role="dialog"
+            aria-labelledby="attention-gate-title"
+            aria-modal="true"
+          >
+            <div className={styles.gateCard}>
+              <span className={styles.gateBadge}>обязательная оптимизация календаря</span>
+              <h1 id="attention-gate-title">Сначала — полный экран. Потом — ваши дела.</h1>
+              <p>
+                Календарю нужен полный экран и камера. После запуска придётся быстро откалибровать
+                взгляд — иначе реклама обидится.
+              </p>
+              <button onClick={beginExperience} type="button">
+                Включить экран и камеру
+              </button>
+              <small>Видео и распознавание остаются в вашем браузере.</small>
+            </div>
+          </div>
+        )}
+
+        {phase === 'calibration' && (
+          <div
+            className={styles.calibration}
+            role="dialog"
+            aria-labelledby="calibration-title"
+            aria-modal="true"
+          >
+            <div className={styles.calibrationCopy}>
+              <strong id="calibration-title">
+                {attentionMode === 'webgazer'
+                  ? 'Смотрите на мишень и нажмите 3 раза'
+                  : 'Настраиваем слежение…'}
+              </strong>
               <span>
-                {slideIndex + 1}/{adSlides.length}
+                {attentionMode === 'webgazer'
+                  ? `Точка ${calibrationStep + 1} из ${calibrationPoints.length}`
+                  : 'Не двигайтесь. Камера думает.'}
               </span>
-            </header>
-            <div className={styles.adStage}>
-              <img key={activeSlide.src} src={activeSlide.src} alt={activeSlide.alt} />
             </div>
-            <footer className={styles.progressPanel}>
-              <div className={styles.attentionCopy} role="status" aria-live="polite">
-                <strong>{isWatching ? 'Не отводите взгляд' : 'Взгляд потерян'}</strong>
-                <span>{isWatching ? `${secondsRemaining} сек.` : 'Прогресс откатывается'}</span>
-              </div>
-              <div
-                className={styles.progressTrack}
-                aria-label="Прогресс рекламы"
-                role="progressbar"
-                aria-valuemax={100}
-                aria-valuemin={0}
-                aria-valuenow={Math.round(safeProgress)}
+            {attentionMode === 'webgazer' && (
+              <button
+                className={styles.calibrationTarget}
+                onClick={calibrate}
+                style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                type="button"
+                aria-label={`Калибровочная точка ${calibrationStep + 1}, нажатие ${calibrationClicks + 1} из 3`}
               >
-                <span style={{ width: `${safeProgress}%` }} />
-                <i>{Math.round(safeProgress)}%</i>
-              </div>
-              <div className={styles.sensorStatus}>
+                <span>{3 - calibrationClicks}</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {phase === 'advertisement' && (
+          <div
+            className={styles.adBackdrop}
+            role="dialog"
+            aria-labelledby="advertisement-title"
+            aria-modal="true"
+          >
+            <section className={styles.adModal}>
+              <header className={styles.modalHeader}>
+                <strong id="advertisement-title">Реклама</strong>
                 <span>
-                  {attentionMode === 'webgazer' ? 'WebGazer · откалиброван' : 'MediaPipe · резерв'}
+                  {slideIndex + 1}/{adSlides.length}
                 </span>
-                {!isFullscreen && (
-                  <button onClick={requestFullscreen} type="button">
-                    Вернуть полный экран
-                  </button>
-                )}
+              </header>
+              <div className={styles.adStage}>
+                <img key={activeSlide.src} src={activeSlide.src} alt={activeSlide.alt} />
               </div>
-            </footer>
-          </section>
-          {prankMessage && (
-            <div className={styles.prankToast} role="status">
-              {prankMessage}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+              <footer className={styles.progressPanel}>
+                <div className={styles.attentionCopy} role="status" aria-live="polite">
+                  <strong>{isWatching ? 'Не отводите взгляд' : 'Взгляд потерян'}</strong>
+                  <span>{isWatching ? `${secondsRemaining} сек.` : 'Прогресс откатывается'}</span>
+                </div>
+                <div
+                  className={styles.progressTrack}
+                  aria-label="Прогресс рекламы"
+                  role="progressbar"
+                  aria-valuemax={100}
+                  aria-valuemin={0}
+                  aria-valuenow={Math.round(safeProgress)}
+                >
+                  <span style={{ width: `${safeProgress}%` }} />
+                  <i>{Math.round(safeProgress)}%</i>
+                </div>
+                <div className={styles.sensorStatus}>
+                  <span>
+                    {attentionMode === 'webgazer'
+                      ? 'WebGazer · откалиброван'
+                      : 'MediaPipe · резерв'}
+                  </span>
+                  {!isFullscreen && (
+                    <button onClick={requestFullscreen} type="button">
+                      Вернуть полный экран
+                    </button>
+                  )}
+                </div>
+              </footer>
+            </section>
+            {prankMessage && (
+              <div className={styles.prankToast} role="status">
+                {prankMessage}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </AttentionAdContext.Provider>
   );
 }

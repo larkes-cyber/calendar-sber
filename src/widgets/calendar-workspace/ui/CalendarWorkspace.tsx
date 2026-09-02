@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { mockCalendars, CalendarSidebar } from '@entities/calendar';
 import { EventDetails, mockEvents, type CalendarEvent } from '@entities/event';
 import { toFullCalendarEvents } from '@entities/event/lib/fullCalendar';
+import { useAttentionAd } from '@features/attention-ad';
 import { CalendarViewSwitcher, type CalendarRouteView } from '@features/calendar-navigation';
 import { CreateEventButton, CreateEventModal, type CreateEventInput } from '@features/create-event';
 import { formatRouteDate, resolveRouteDate } from '@shared/lib/date';
@@ -34,6 +35,7 @@ const timeSlotMinutes = 30;
 
 export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
   const navigate = useNavigate();
+  const showAdvertisement = useAttentionAd();
   const calendarRef = useRef<FullCalendar>(null);
   const dayCellCleanups = useRef(new WeakMap<HTMLElement, () => void>());
   const [events, setEvents] = useState<CalendarEvent[]>(mockEvents);
@@ -47,10 +49,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
     initialAttendees?: string[];
   } | null>(null);
 
-  const calendarEvents = useMemo(
-    () => toFullCalendarEvents(events, mockCalendars),
-    [events]
-  );
+  const calendarEvents = useMemo(() => toFullCalendarEvents(events, mockCalendars), [events]);
 
   const handleViewChange = (nextView: CalendarRouteView) => {
     navigate(`/${nextView}/${visibleDate}`);
@@ -67,6 +66,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
 
   const openEventModal = () => {
     setNewEventRange(createDefaultMeetingRange(new Date(`${visibleDate}T10:00:00`)));
+    showAdvertisement();
   };
 
   const scheduleWithColleague = (startsAt: Date, colleague: string) => {
@@ -77,15 +77,18 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
       initialTitle: `Синхронизация с ${colleague.split(' ')[0]}`,
       initialAttendees: [colleague]
     });
+    showAdvertisement();
   };
 
   const handleDateSelect = (selection: DateSelectArg) => {
     if (selection.allDay) {
       setNewEventRange(createDefaultMeetingRange(selection.start));
+      showAdvertisement();
       return;
     }
 
     setNewEventRange({ startsAt: selection.start, endsAt: selection.end });
+    showAdvertisement();
   };
 
   const mountDayTimeSelector = (cell: DayCellMountArg) => {
@@ -112,7 +115,11 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
       const frameRect = frame.getBoundingClientRect();
       const contentTop = 38;
       const contentHeight = Math.max(frameRect.height - contentTop - 8, 1);
-      const startMinute = getMinuteFromPointer(event.clientY, frameRect.top + contentTop, contentHeight);
+      const startMinute = getMinuteFromPointer(
+        event.clientY,
+        frameRect.top + contentTop,
+        contentHeight
+      );
       const selection = document.createElement('div');
       selection.className = styles.timeSelection;
       frame.append(selection);
@@ -130,8 +137,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
         );
         const startRatio =
           (rangeStart - workDayStartMinutes) / (workDayEndMinutes - workDayStartMinutes);
-        const durationRatio =
-          (rangeEnd - rangeStart) / (workDayEndMinutes - workDayStartMinutes);
+        const durationRatio = (rangeEnd - rangeStart) / (workDayEndMinutes - workDayStartMinutes);
 
         selection.style.top = `${contentTop + startRatio * contentHeight}px`;
         selection.style.height = `${Math.max(durationRatio * contentHeight, 5)}px`;
@@ -152,6 +158,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
           startsAt: createDateAtMinutes(cell.date, selectedRange.rangeStart),
           endsAt: createDateAtMinutes(cell.date, selectedRange.rangeEnd)
         });
+        showAdvertisement();
       };
 
       cancelActiveSelection = () => {
@@ -197,6 +204,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
 
     setEvents((current) => [...current, event]);
     closeEventModal();
+    showAdvertisement();
   };
 
   return (
@@ -216,13 +224,25 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
             <div className={styles.heading}>
               <h1>{calendarTitle || 'Рабочее расписание'}</h1>
               <div className={styles.dateNavigation} aria-label="Навигация по датам">
-                <button aria-label="Предыдущий период" onClick={() => moveCalendar('prev')} type="button">
+                <button
+                  aria-label="Предыдущий период"
+                  onClick={() => moveCalendar('prev')}
+                  type="button"
+                >
                   ‹
                 </button>
-                <button className={styles.todayButton} onClick={() => moveCalendar('today')} type="button">
+                <button
+                  className={styles.todayButton}
+                  onClick={() => moveCalendar('today')}
+                  type="button"
+                >
                   Сегодня
                 </button>
-                <button aria-label="Следующий период" onClick={() => moveCalendar('next')} type="button">
+                <button
+                  aria-label="Следующий период"
+                  onClick={() => moveCalendar('next')}
+                  type="button"
+                >
                   ›
                 </button>
               </div>
@@ -235,9 +255,9 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
           <div className={styles.calendarSurface}>
             <FullCalendar
               allDaySlot={false}
-            datesSet={handleDatesSet}
-            dayCellDidMount={mountDayTimeSelector}
-            dayCellWillUnmount={unmountDayTimeSelector}
+              datesSet={handleDatesSet}
+              dayCellDidMount={mountDayTimeSelector}
+              dayCellWillUnmount={unmountDayTimeSelector}
               dayMaxEvents={3}
               displayEventTime={false}
               events={calendarEvents}
@@ -251,7 +271,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
               nowIndicator
               plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
               ref={calendarRef}
-            selectable={view === 'week'}
+              selectable={view === 'week'}
               select={handleDateSelect}
               selectMirror
             />
@@ -266,6 +286,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
           key={`${newEventRange.startsAt.toISOString()}-${newEventRange.endsAt.toISOString()}`}
           onClose={closeEventModal}
           onCreate={handleCreateEvent}
+          onInteraction={showAdvertisement}
           startsAt={newEventRange.startsAt}
         />
       ) : null}

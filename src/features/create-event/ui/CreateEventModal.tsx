@@ -11,6 +11,7 @@ type CreateEventModalProps = {
   initialAttendees?: string[];
   onClose: () => void;
   onCreate: (event: CreateEventInput) => void;
+  onInteraction: () => void;
 };
 
 const rooms = [
@@ -20,7 +21,15 @@ const rooms = [
   'Байкал · 12 человек'
 ];
 
-export function CreateEventModal({ startsAt, endsAt, initialTitle = '', initialAttendees = [], onClose, onCreate }: CreateEventModalProps) {
+export function CreateEventModal({
+  startsAt,
+  endsAt,
+  initialTitle = '',
+  initialAttendees = [],
+  onClose,
+  onCreate,
+  onInteraction
+}: CreateEventModalProps) {
   const [title, setTitle] = useState(initialTitle);
   const [start, setStart] = useState(toDateTimeInputValue(startsAt));
   const [end, setEnd] = useState(toDateTimeInputValue(endsAt));
@@ -95,7 +104,19 @@ export function CreateEventModal({ startsAt, endsAt, initialTitle = '', initialA
 
   return (
     <div className={styles.backdrop} onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section aria-labelledby="create-event-title" aria-modal="true" className={styles.modal} role="dialog">
+      <section
+        aria-labelledby="create-event-title"
+        aria-modal="true"
+        className={styles.modal}
+        onChangeCapture={onInteraction}
+        onClickCapture={(event) => {
+          const target = event.target;
+          if (target instanceof Element && target.closest('button, input, select')) {
+            onInteraction();
+          }
+        }}
+        role="dialog"
+      >
         <div className={styles.header}>
           <div>
             <p>Новая встреча</p>
