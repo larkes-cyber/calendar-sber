@@ -1,0 +1,462 @@
+.experience {
+  min-height: 100vh;
+}
+
+.topBanner {
+  max-height: 0;
+  overflow: hidden;
+  background: #050505;
+  transition: max-height 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.topBannerExpanded {
+  max-height: clamp(110px, 33.34vw, 430px);
+}
+.topBanner img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cameraFeed {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gate,
+.calibration,
+.adBackdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+}
+
+.gate {
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: 32px;
+  color: #fff7c5;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 211, 0, 0.08) 0 12px, transparent 12px 24px),
+    #171100;
+}
+
+.gateCard {
+  width: min(720px, 100%);
+  padding: clamp(28px, 6vw, 72px);
+  border: 4px solid #ffd400;
+  background: #d71913;
+  box-shadow:
+    18px 18px 0 #ffd400,
+    30px 30px 0 #050505;
+}
+
+.gateBadge {
+  display: inline-block;
+  padding: 7px 10px;
+  color: #140c00;
+  background: #ffd400;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gate h1 {
+  max-width: 620px;
+  margin: 22px 0 16px;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: clamp(42px, 8vw, 92px);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.gate p {
+  max-width: 610px;
+  margin: 0 0 28px;
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.gate button {
+  width: 100%;
+  min-height: 64px;
+  padding: 14px 22px;
+  border: 3px solid #171100;
+  color: #171100;
+  background: #ffd400;
+  box-shadow: 7px 7px 0 #171100;
+  cursor: pointer;
+  font-size: clamp(17px, 2.2vw, 23px);
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.gate button:active {
+  transform: translate(4px, 4px);
+  box-shadow: 3px 3px 0 #171100;
+}
+.gate small {
+  display: block;
+  margin-top: 20px;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  line-height: 1.45;
+}
+
+.notch {
+  position: fixed;
+  z-index: 1200;
+  top: -2px;
+  left: 50%;
+  display: grid;
+  grid-template-columns: 72px 72px;
+  place-content: center;
+  align-items: center;
+  width: 156px;
+  height: 38px;
+  overflow: hidden;
+  gap: 10px;
+  border-radius: 0 0 22px 22px;
+  color: #fff;
+  background: #050505;
+  box-shadow: 0 10px 38px rgba(0, 0, 0, 0.38);
+  transform: translateX(-50%);
+  transform-origin: 50% 0;
+  transition:
+    width 520ms cubic-bezier(0.16, 1, 0.3, 1),
+    height 520ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-radius 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notchExpanded {
+  width: min(390px, calc(100vw - 24px));
+  height: 130px;
+  padding-top: 10px;
+  border-radius: 0 0 34px 34px;
+}
+
+.eye {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border: 3px solid #f7f7f1;
+  border-radius: 50%;
+  background: #181818;
+  box-shadow:
+    0 0 0 2px #333,
+    inset 0 0 14px #000;
+}
+
+.eye canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.eye::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 12px 4px #000;
+  content: '';
+}
+
+.eyePlaceholder {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 4px solid #5dd35d;
+  border-radius: 50%;
+  background: #050505;
+  transform: translate(var(--gaze-x), var(--gaze-y));
+}
+
+.cameraDot {
+  position: absolute;
+  top: 12px;
+  left: 18px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6d1717;
+}
+.cameraDot[data-active='true'] {
+  background: #62df64;
+  box-shadow: 0 0 12px #62df64;
+}
+.notchStatus {
+  grid-column: 1 / -1;
+  min-width: 220px;
+  color: #b9b9b9;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.calibration {
+  overflow: hidden;
+  color: #fff;
+  background: rgba(5, 5, 5, 0.96);
+}
+
+.calibrationCopy {
+  position: absolute;
+  top: 132px;
+  left: 50%;
+  display: grid;
+  width: min(520px, calc(100vw - 32px));
+  gap: 7px;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.calibrationCopy strong {
+  font-size: clamp(18px, 3vw, 30px);
+  text-transform: uppercase;
+}
+.calibrationCopy span {
+  color: #bdbdbd;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+}
+
+.calibrationTarget {
+  position: absolute;
+  display: grid;
+  width: 70px;
+  height: 70px;
+  padding: 0;
+  border: 8px solid #fff;
+  border-radius: 50%;
+  place-items: center;
+  color: #fff;
+  background: #e31712;
+  box-shadow:
+    0 0 0 10px #ffd400,
+    0 0 55px rgba(255, 212, 0, 0.55);
+  cursor: crosshair;
+  font-size: 25px;
+  font-weight: 950;
+  transform: translate(-50%, -50%);
+}
+
+.adBackdrop {
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: 32px 20px 20px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(5px);
+}
+
+.adModal {
+  display: grid;
+  width: min(940px, calc(100vw - 32px));
+  max-height: calc(100vh - 68px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #111;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.72);
+}
+
+.modalHeader {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  color: #ddd;
+  background: #161616;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.modalHeader strong {
+  color: #fff;
+}
+.adStage {
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  background: #050505;
+}
+
+.adStage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: calc(100vh - 220px);
+  object-fit: contain;
+  animation: ad-arrival 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.progressPanel {
+  display: grid;
+  min-height: 76px;
+  grid-template-columns: minmax(150px, 0.7fr) minmax(260px, 1.6fr) minmax(150px, 0.7fr);
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #161616;
+}
+
+.attentionCopy {
+  display: grid;
+  gap: 3px;
+}
+.attentionCopy strong {
+  color: #ffd400;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+.attentionCopy span,
+.sensorStatus {
+  color: #aaa;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 11px;
+}
+
+.progressTrack {
+  position: relative;
+  height: 28px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #3a0805;
+}
+.progressTrack span {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, #ffd400 0 20px, #f34b16 20px 24px);
+  transition: width 100ms linear;
+}
+.progressTrack i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: #fff;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+  text-shadow: 0 1px 3px #000;
+  transform: translate(-50%, -50%);
+}
+
+.sensorStatus {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  text-transform: uppercase;
+}
+.sensorStatus button {
+  padding: 5px 8px;
+  border: 1px solid #ffd400;
+  color: #ffd400;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.prankToast {
+  position: fixed;
+  z-index: 1250;
+  bottom: 28px;
+  left: 50%;
+  padding: 12px 18px;
+  color: #140b00;
+  background: #ffd400;
+  box-shadow: 6px 6px 0 #140b00;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+
+.alarm::after {
+  position: fixed;
+  z-index: 1190;
+  inset: 0;
+  box-shadow: inset 0 0 100px 42px rgba(255, 0, 0, 0.98);
+  content: '';
+  pointer-events: none;
+  animation: alarm-pulse 760ms ease-in-out infinite alternate;
+}
+
+@keyframes ad-arrival {
+  from {
+    opacity: 0;
+    transform: scale(0.975);
+  }
+}
+@keyframes alarm-pulse {
+  from {
+    opacity: 0.24;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+}
+
+@media (max-width: 720px) {
+  .gate {
+    padding: 18px;
+  }
+  .gateCard {
+    box-shadow:
+      9px 9px 0 #ffd400,
+      16px 16px 0 #050505;
+  }
+  .progressPanel {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .attentionCopy {
+    grid-template-columns: 1fr auto;
+  }
+  .sensorStatus {
+    display: none;
+  }
+  .adStage img {
+    max-height: calc(100vh - 250px);
+  }
+  .calibrationCopy {
+    top: 126px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notch,
+  .topBanner,
+  .progressTrack span {
+    transition-duration: 1ms;
+  }
+  .adStage img {
+    animation: none;
+  }
+  .alarm::after {
+    animation: none;
+    opacity: 0.8;
+  }
+}
