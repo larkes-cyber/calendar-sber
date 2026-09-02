@@ -37,6 +37,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
   const navigate = useNavigate();
   const showAdvertisement = useAttentionAd();
   const calendarRef = useRef<FullCalendar>(null);
+  const planningActionCountRef = useRef(0);
   const dayCellCleanups = useRef(new WeakMap<HTMLElement, () => void>());
   const [events, setEvents] = useState<CalendarEvent[]>(mockEvents);
   const selectedDate = resolveRouteDate(firstDay);
@@ -65,30 +66,38 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
   };
 
   const openEventModal = () => {
+    planningActionCountRef.current = 0;
     setNewEventRange(createDefaultMeetingRange(new Date(`${visibleDate}T10:00:00`)));
-    showAdvertisement();
   };
 
   const scheduleWithColleague = (startsAt: Date, colleague: string) => {
     const endsAt = new Date(startsAt.getTime() + 30 * 60 * 1000);
+    planningActionCountRef.current = 0;
     setNewEventRange({
       startsAt,
       endsAt,
       initialTitle: `Синхронизация с ${colleague.split(' ')[0]}`,
       initialAttendees: [colleague]
     });
-    showAdvertisement();
   };
 
   const handleDateSelect = (selection: DateSelectArg) => {
+    planningActionCountRef.current = 0;
     if (selection.allDay) {
       setNewEventRange(createDefaultMeetingRange(selection.start));
-      showAdvertisement();
       return;
     }
 
     setNewEventRange({ startsAt: selection.start, endsAt: selection.end });
-    showAdvertisement();
+  };
+
+  const handlePlanningAction = () => {
+    planningActionCountRef.current += 1;
+
+    if (planningActionCountRef.current === 5) {
+      planningActionCountRef.current = 0;
+      window.setTimeout(showAdvertisement, 0);
+    }
   };
 
   const mountDayTimeSelector = (cell: DayCellMountArg) => {
@@ -158,7 +167,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
           startsAt: createDateAtMinutes(cell.date, selectedRange.rangeStart),
           endsAt: createDateAtMinutes(cell.date, selectedRange.rangeEnd)
         });
-        showAdvertisement();
+        planningActionCountRef.current = 0;
       };
 
       cancelActiveSelection = () => {
@@ -204,7 +213,6 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
 
     setEvents((current) => [...current, event]);
     closeEventModal();
-    showAdvertisement();
   };
 
   return (
@@ -286,7 +294,7 @@ export function CalendarWorkspace({ view, firstDay }: CalendarWorkspaceProps) {
           key={`${newEventRange.startsAt.toISOString()}-${newEventRange.endsAt.toISOString()}`}
           onClose={closeEventModal}
           onCreate={handleCreateEvent}
-          onInteraction={showAdvertisement}
+          onPlanningAction={handlePlanningAction}
           startsAt={newEventRange.startsAt}
         />
       ) : null}

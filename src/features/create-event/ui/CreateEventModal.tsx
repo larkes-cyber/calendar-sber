@@ -11,7 +11,7 @@ type CreateEventModalProps = {
   initialAttendees?: string[];
   onClose: () => void;
   onCreate: (event: CreateEventInput) => void;
-  onInteraction: () => void;
+  onPlanningAction: () => void;
 };
 
 const rooms = [
@@ -28,7 +28,7 @@ export function CreateEventModal({
   initialAttendees = [],
   onClose,
   onCreate,
-  onInteraction
+  onPlanningAction
 }: CreateEventModalProps) {
   const [title, setTitle] = useState(initialTitle);
   const [start, setStart] = useState(toDateTimeInputValue(startsAt));
@@ -108,11 +108,12 @@ export function CreateEventModal({
         aria-labelledby="create-event-title"
         aria-modal="true"
         className={styles.modal}
-        onChangeCapture={onInteraction}
+        data-meeting-planner
+        onChangeCapture={onPlanningAction}
         onClickCapture={(event) => {
           const target = event.target;
-          if (target instanceof Element && target.closest('button, input, select')) {
-            onInteraction();
+          if (target instanceof Element && target.closest('button')) {
+            onPlanningAction();
           }
         }}
         role="dialog"

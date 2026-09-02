@@ -58,7 +58,7 @@ const drawEye = (
   landmarks: NormalizedLandmark[],
   indexes: number[]
 ) => {
-  if (!canvas || !video.videoWidth || !video.videoHeight) return;
+  if (!canvas || !video.videoWidth || !video.videoHeight) return false;
   const points = indexes.map((index) => landmarks[index]).filter(Boolean);
   const minX = Math.min(...points.map((point) => point.x));
   const maxX = Math.max(...points.map((point) => point.x));
@@ -69,7 +69,7 @@ const drawEye = (
   const sourceWidth = Math.max((maxX - minX) * video.videoWidth * 1.5, 52);
   const sourceHeight = Math.max((maxY - minY) * video.videoHeight * 2.35, 38);
   const context = canvas.getContext('2d');
-  if (!context) return;
+  if (!context) return false;
 
   context.save();
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -87,6 +87,7 @@ const drawEye = (
     canvas.height
   );
   context.restore();
+  return true;
 };
 
 export function AttentionAdExperience({ children }: Props) {
@@ -102,6 +103,7 @@ export function AttentionAdExperience({ children }: Props) {
   const [prankMessage, setPrankMessage] = useState('');
   const [bannerExpanded, setBannerExpanded] = useState(false);
   const [initialAdStarted, setInitialAdStarted] = useState(false);
+  const [eyesRendered, setEyesRendered] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const leftEyeRef = useRef<HTMLCanvasElement>(null);
@@ -262,11 +264,28 @@ export function AttentionAdExperience({ children }: Props) {
       ) {
         lastVideoTime = video.currentTime;
         lastDetectionTime = time;
-        const [landmarks] = faceLandmarker.detectForVideo(video, time).faceLandmarks;
+        let landmarks: NormalizedLandmark[] | undefined;
+        try {
+          [landmarks] = faceLandmarker.detectForVideo(video, time).faceLandmarks;
+        } catch {
+          animationFrame = requestAnimationFrame(renderEyes);
+          return;
+        }
         if (landmarks?.length >= 478) {
           misses = 0;
-          drawEye(leftEyeRef.current, video, landmarks, [362, 263, 386, 374, 385, 380]);
-          drawEye(rightEyeRef.current, video, landmarks, [33, 133, 159, 145, 158, 153]);
+          const leftEyeRendered = drawEye(
+            leftEyeRef.current,
+            video,
+            landmarks,
+            [362, 263, 386, 374, 385, 380]
+          );
+          const rightEyeRendered = drawEye(
+            rightEyeRef.current,
+            video,
+            landmarks,
+            [33, 133, 159, 145, 158, 153]
+          );
+          if (leftEyeRendered && rightEyeRendered) setEyesRendered(true);
           if (modeRef.current !== 'webgazer') {
             const leftIris = averageLandmarks(landmarks, [468, 469, 470, 471, 472]);
             const rightIris = averageLandmarks(landmarks, [473, 474, 475, 476, 477]);
@@ -335,6 +354,10 @@ export function AttentionAdExperience({ children }: Props) {
       faceLandmarker?.close();
     };
   }, [cameraState, changeMode, trackingActive]);
+
+  useEffect(() => {
+    if (cameraState !== 'ready') setEyesRendered(false);
+  }, [cameraState]);
 
   useEffect(() => {
     if (!trackingActive || attentionMode !== 'pointer') return;
@@ -424,6 +447,7 @@ export function AttentionAdExperience({ children }: Props) {
 
     const target = event.target;
     if (!(target instanceof Element) || !target.closest('button')) return;
+    if (target.closest('[data-meeting-planner]')) return;
 
     buttonClickCountRef.current += 1;
     if (buttonClickCountRef.current < 5) return;
@@ -472,12 +496,22 @@ export function AttentionAdExperience({ children }: Props) {
           <div className={`${styles.notch} ${styles.notchExpanded}`}>
             <div className={styles.cameraDot} data-active={cameraState === 'ready'} />
             <div className={styles.eye} aria-hidden="true">
-              <canvas height="72" ref={leftEyeRef} width="72" />
-              {cameraState !== 'ready' && <span className={styles.eyePlaceholder} />}
+              <canvas
+                className={eyesRendered ? styles.eyeCanvasVisible : ''}
+                height="72"
+                ref={leftEyeRef}
+                width="72"
+              />
+              {!eyesRendered && <span className={styles.eyePlaceholder} />}
             </div>
             <div className={styles.eye} aria-hidden="true">
-              <canvas height="72" ref={rightEyeRef} width="72" />
-              {cameraState !== 'ready' && <span className={styles.eyePlaceholder} />}
+              <canvas
+                className={eyesRendered ? styles.eyeCanvasVisible : ''}
+                height="72"
+                ref={rightEyeRef}
+                width="72"
+              />
+              {!eyesRendered && <span className={styles.eyePlaceholder} />}
             </div>
             <span className={styles.notchStatus}>
               {phase === 'calibration'
