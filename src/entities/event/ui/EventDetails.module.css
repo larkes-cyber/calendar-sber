@@ -1,0 +1,56 @@
+.root {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  min-height: 320px;
+  padding: 20px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.root h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.empty {
+  margin: 0;
+  color: #66737d;
+}
+
+.status {
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #0f3d2e;
+  background: #e2f4e9;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.meta {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.meta div {
+  display: grid;
+  gap: 4px;
+}
+
+.meta dt {
+  color: #66737d;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.meta dd,
+.description {
+  margin: 0;
+  color: #26332d;
+  line-height: 1.5;
+}

@@ -1,0 +1,36 @@
+.root {
+  border-bottom: 1px solid #dce3dc;
+  background: #ffffff;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(1120px, calc(100% - 32px));
+  min-height: 64px;
+  margin: 0 auto;
+  gap: 24px;
+}
+
+.logo {
+  color: #0f3d2e;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  gap: 16px;
+  color: #526058;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nav a {
+  text-decoration: none;
+}
+
+.nav a:hover {
+  color: #16794c;
+}

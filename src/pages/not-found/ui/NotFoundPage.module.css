@@ -1,0 +1,17 @@
+.root {
+  display: grid;
+  gap: 16px;
+  align-content: center;
+  min-height: 50vh;
+}
+
+.root h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.root a {
+  width: fit-content;
+  color: #16794c;
+  font-weight: 600;
+}

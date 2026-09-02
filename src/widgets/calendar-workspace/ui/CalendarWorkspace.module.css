@@ -1,0 +1,73 @@
+.root {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+.content {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.caption {
+  margin: 0 0 6px;
+  color: #16794c;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.toolbar h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.15;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendarSurface {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+@media (max-width: 1120px) {
+  .root {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .root > :last-child {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 860px) {
+  .root {
+    grid-template-columns: 1fr;
+  }
+
+  .root > :last-child {
+    grid-column: auto;
+  }
+
+  .toolbar,
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
