@@ -44,7 +44,18 @@ export function EventDetails({ event }: EventDetailsProps) {
             <dd>{event.location}</dd>
           </div>
         ) : null}
+        {event.attendees?.length ? (
+          <div>
+            <dt>Участники</dt>
+            <dd>{event.attendees.join(', ')}</dd>
+          </div>
+        ) : null}
       </dl>
+      {event.videoMeetingUrl ? (
+        <a className={styles.videoLink} href={event.videoMeetingUrl} rel="noreferrer" target="_blank">
+          Подключиться к видеовстрече
+        </a>
+      ) : null}
       {event.description ? <p className={styles.description}>{event.description}</p> : null}
     </aside>
   );

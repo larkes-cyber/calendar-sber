@@ -1,8 +1,15 @@
 .root {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: 276px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 20px;
+  min-width: 0;
 }
 
 .sidebar,
@@ -91,6 +98,54 @@
   box-shadow: 0 8px 30px rgba(28, 38, 34, 0.05);
 }
 
+.timeSelectable {
+  position: relative;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.timeSelection {
+  position: absolute;
+  z-index: 6;
+  right: 5px;
+  left: 5px;
+  min-height: 5px;
+  border: 1px dashed #1677ff;
+  border-radius: 4px;
+  background: rgba(47, 125, 244, 0.2);
+  box-shadow: inset 3px 0 0 #2f7df4;
+  pointer-events: none;
+}
+
+.timeSelection::after {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: #165fc7;
+  background: #e7f0ff;
+  content: attr(data-time);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 1280px) {
+  .workspace {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1180px) {
+  .root {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1040px) {
   .toolbar,
   .heading {
@@ -108,7 +163,7 @@
 }
 
 @media (max-width: 760px) {
-  .root {
+  .workspace {
     grid-template-columns: 1fr;
   }
 

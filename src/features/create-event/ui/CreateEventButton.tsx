@@ -1,8 +1,12 @@
 import styles from './CreateEventButton.module.css';
 
-export function CreateEventButton() {
+type CreateEventButtonProps = {
+  onClick: () => void;
+};
+
+export function CreateEventButton({ onClick }: CreateEventButtonProps) {
   return (
-    <button className={styles.button} type="button">
+    <button className={styles.button} onClick={onClick} type="button">
       Новое событие
     </button>
   );

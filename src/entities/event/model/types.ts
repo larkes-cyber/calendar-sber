@@ -5,7 +5,9 @@ export type CalendarEvent = {
   startsAt: string;
   endsAt: string;
   owner: string;
+  attendees?: string[];
   location?: string;
+  videoMeetingUrl?: string;
   description?: string;
   status: 'planned' | 'confirmed' | 'done';
 };

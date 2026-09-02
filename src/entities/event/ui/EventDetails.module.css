@@ -57,3 +57,18 @@
   font-size: 13px;
   line-height: 1.45;
 }
+
+.videoLink {
+  padding: 9px 10px;
+  border-radius: 6px;
+  color: #116846;
+  background: #e7f5ed;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.videoLink:hover {
+  background: #dcefe5;
+}
