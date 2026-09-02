@@ -4,21 +4,21 @@ export const mockCalendars: CalendarMeta[] = [
   {
     id: 'team',
     name: 'Команда',
-    color: '#16794c',
+    color: '#16845b',
     isVisible: true,
     source: 'local'
   },
   {
     id: 'engineering',
     name: 'Разработка',
-    color: '#2f6fbb',
+    color: '#3276db',
     isVisible: true,
     source: 'caldav'
   },
   {
     id: 'external',
     name: 'Внешние',
-    color: '#9a5a13',
+    color: '#d97724',
     isVisible: true,
     source: 'webcal'
   }

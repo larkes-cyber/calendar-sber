@@ -1,5 +1,5 @@
 .root {
-  border-bottom: 1px solid #dce3dc;
+  border-bottom: 1px solid #e2e5e3;
   background: #ffffff;
 }
 
@@ -7,14 +7,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: min(1120px, calc(100% - 32px));
+  width: min(1480px, calc(100% - 40px));
   min-height: 64px;
   margin: 0 auto;
   gap: 24px;
 }
 
 .logo {
-  color: #0f3d2e;
+  color: #173d30;
   font-size: 18px;
   font-weight: 700;
 }
@@ -32,5 +32,17 @@
 }
 
 .nav a:hover {
-  color: #16794c;
+  color: #16845b;
+}
+
+@media (max-width: 760px) {
+  .inner {
+    width: calc(100% - 24px);
+  }
+}
+
+@media (max-width: 560px) {
+  .nav a:last-child {
+    display: none;
+  }
 }

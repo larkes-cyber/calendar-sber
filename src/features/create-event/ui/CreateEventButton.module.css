@@ -1,14 +1,16 @@
 .button {
-  min-height: 44px;
-  padding: 0 18px;
+  min-height: 40px;
+  padding: 0 16px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 7px;
   color: #ffffff;
-  background: #16794c;
+  background: #16845b;
   cursor: pointer;
+  font-size: 13px;
   font-weight: 700;
+  box-shadow: 0 4px 12px rgba(22, 132, 91, 0.18);
 }
 
 .button:hover {
-  background: #0f633c;
+  background: #116f4b;
 }

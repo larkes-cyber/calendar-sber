@@ -1,10 +1,11 @@
 .root {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr) 300px;
-  gap: 16px;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
 }
 
+.sidebar,
 .content {
   display: grid;
   gap: 16px;
@@ -13,61 +14,139 @@
 
 .toolbar {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 20px;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
   gap: 16px;
+  min-width: 0;
 }
 
-.caption {
-  margin: 0 0 6px;
-  color: #16794c;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.toolbar h1 {
+.heading h1 {
+  min-width: 0;
   margin: 0;
-  font-size: 32px;
-  line-height: 1.15;
+  color: #151a1e;
+  font-size: 27px;
+  font-weight: 720;
+  line-height: 1.2;
+  text-transform: capitalize;
+}
+
+.dateNavigation {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  overflow: hidden;
+  min-height: 38px;
+  border: 1px solid #dce1e6;
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.dateNavigation button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  color: #424b53;
+  background: transparent;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.dateNavigation button:hover {
+  color: #116b4b;
+  background: #f1f7f4;
+}
+
+.dateNavigation .todayButton {
+  width: auto;
+  padding: 0 12px;
+  border-right: 1px solid #e5e8eb;
+  border-left: 1px solid #e5e8eb;
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .actions {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .calendarSurface {
   min-width: 0;
-  padding: 16px;
-  border: 1px solid #d8dee6;
+  overflow: hidden;
+  border: 1px solid #dfe3e7;
   border-radius: 8px;
   background: #ffffff;
+  box-shadow: 0 8px 30px rgba(28, 38, 34, 0.05);
 }
 
-@media (max-width: 1120px) {
-  .root {
-    grid-template-columns: 220px minmax(0, 1fr);
+@media (max-width: 1040px) {
+  .toolbar,
+  .heading {
+    align-items: flex-start;
   }
 
-  .root > :last-child {
-    grid-column: 2;
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 760px) {
   .root {
     grid-template-columns: 1fr;
   }
 
-  .root > :last-child {
-    grid-column: auto;
+  .content {
+    grid-row: 1;
   }
 
-  .toolbar,
+  .sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heading {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .heading h1 {
+    font-size: 23px;
+  }
+}
+
+@media (max-width: 560px) {
+  .heading,
   .actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .dateNavigation,
+  .dateNavigation .todayButton {
+    width: 100%;
+  }
+
+  .dateNavigation button {
+    flex: 1;
+  }
+
+  .sidebar {
+    grid-template-columns: 1fr;
   }
 }

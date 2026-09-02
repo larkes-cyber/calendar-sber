@@ -18,8 +18,9 @@ export function toFullCalendarEvents(
       title: event.title,
       start: event.startsAt,
       end: event.endsAt,
-      backgroundColor: calendar?.color,
-      borderColor: calendar?.color,
+      backgroundColor: `${calendar?.color ?? '#4b5563'}24`,
+      borderColor: 'transparent',
+      textColor: calendar?.color,
       extendedProps: {
         calendarId: event.calendarId,
         owner: event.owner,

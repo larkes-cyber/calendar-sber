@@ -1,24 +1,25 @@
 .root {
   display: inline-grid;
-  grid-template-columns: repeat(3, minmax(80px, 1fr));
+  grid-template-columns: repeat(3, minmax(70px, 1fr));
   min-height: 40px;
-  padding: 4px;
-  border: 1px solid #d8dee6;
-  border-radius: 8px;
-  background: #ffffff;
+  padding: 3px;
+  border: 1px solid #dce1e6;
+  border-radius: 7px;
+  background: #f0f2f1;
 }
 
 .option {
   border: 0;
-  border-radius: 6px;
-  color: #526058;
+  border-radius: 5px;
+  color: #5e6862;
   background: transparent;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .option[aria-selected='true'] {
-  color: #0f3d2e;
-  background: #e2f4e9;
+  color: #1d2922;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(24, 34, 28, 0.12);
 }

@@ -1,24 +1,26 @@
 .root {
   display: grid;
-  gap: 18px;
+  gap: 16px;
   align-content: start;
-  padding: 20px;
-  border: 1px solid #d8dee6;
+  padding: 18px;
+  border: 1px solid #dfe3e7;
   border-radius: 8px;
   background: #ffffff;
+  box-shadow: 0 8px 30px rgba(28, 38, 34, 0.04);
 }
 
 .caption {
   margin: 0 0 6px;
-  color: #16794c;
-  font-size: 12px;
-  font-weight: 800;
+  color: #16845b;
+  font-size: 11px;
+  font-weight: 750;
   text-transform: uppercase;
 }
 
 .root h2 {
   margin: 0;
-  font-size: 20px;
+  color: #1d2420;
+  font-size: 18px;
 }
 
 .list {
@@ -30,8 +32,8 @@
   display: grid;
   grid-template-columns: 18px 12px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  min-height: 36px;
+  gap: 9px;
+  min-height: 34px;
   color: #26332d;
   cursor: pointer;
   font-size: 14px;
@@ -41,22 +43,23 @@
   width: 16px;
   height: 16px;
   margin: 0;
+  accent-color: #16845b;
 }
 
 .color {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
 }
 
 .name {
   overflow: hidden;
-  font-weight: 700;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .source {
-  color: #66737d;
-  font-size: 12px;
+  color: #89918c;
+  font-size: 11px;
 }

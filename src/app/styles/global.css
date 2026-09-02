@@ -1,6 +1,6 @@
 :root {
-  color: #16201b;
-  background: #f4f6f8;
+  color: #1c2420;
+  background: #f6f7f6;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
@@ -35,16 +35,21 @@ a {
 }
 
 .app-main {
-  width: min(1320px, calc(100% - 32px));
+  width: min(1480px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 24px 0 48px;
+  padding: 26px 0 48px;
 }
 
 .fc {
-  --fc-border-color: #d8dee6;
-  --fc-today-bg-color: #eef8f2;
+  --fc-border-color: #e5e7e9;
+  --fc-event-bg-color: transparent;
+  --fc-event-border-color: transparent;
+  --fc-page-bg-color: #ffffff;
+  --fc-today-bg-color: #f3f8f5;
+  --fc-neutral-bg-color: #fafbfa;
+  --fc-list-event-hover-bg-color: #f7f9f8;
   --fc-small-font-size: 12px;
-  color: #16201b;
+  color: #161b18;
 }
 
 .fc .fc-toolbar {
@@ -53,18 +58,175 @@ a {
 
 .fc .fc-scrollgrid,
 .fc .fc-list {
-  border-radius: 8px;
-  overflow: hidden;
+  border: 0;
 }
 
-.fc .fc-col-header-cell-cushion,
+.fc-theme-standard td:last-child,
+.fc-theme-standard th:last-child {
+  border-right: 0;
+}
+
+.fc-theme-standard tr:last-child td {
+  border-bottom: 0;
+}
+
+.fc .fc-col-header-cell {
+  height: 46px;
+  border-top: 0;
+  background: #fafbfa;
+  vertical-align: middle;
+}
+
+.fc .fc-col-header-cell-cushion {
+  padding: 0 12px;
+  color: #68716c;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.fc .fc-daygrid-day-frame {
+  min-height: 124px;
+  padding: 8px 7px;
+}
+
+.fc .fc-daygrid-day-top {
+  flex-direction: row;
+}
+
 .fc .fc-daygrid-day-number {
-  color: #44515a;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: #252c28;
+  font-size: 15px;
+  font-weight: 650;
   text-decoration: none;
 }
 
+.fc .fc-day-other .fc-daygrid-day-number {
+  color: #a4aaa6;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  border-radius: 50%;
+  color: #ffffff;
+  background: #16845b;
+}
+
+.fc .fc-daygrid-day-events {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  margin: 7px 1px 0;
+}
+
+.fc .fc-daygrid-event-harness {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  margin-top: 0 !important;
+}
+
 .fc .fc-event {
-  border-radius: 6px;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-height: 27px;
+  margin: 0;
+  padding: 5px 7px;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.fc .fc-event-main,
+.fc .fc-event-title-container,
+.fc .fc-event-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fc .fc-daygrid-event-dot {
+  display: none;
+}
+
+.fc .fc-event-time {
+  margin-right: 4px;
+  font-weight: 750;
+}
+
+.fc .fc-event:focus,
+.fc .fc-event:hover {
+  filter: saturate(1.18) brightness(0.98);
+}
+
+.fc .fc-more-link {
+  margin: 3px 7px;
+  color: #66706a;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.fc .fc-timegrid-slot-label-cushion,
+.fc .fc-list-day-text,
+.fc .fc-list-day-side-text {
+  color: #65706a;
+  text-decoration: none;
+}
+
+@media (max-width: 760px) {
+  .app-main {
+    width: min(100% - 24px, 1480px);
+    padding-top: 18px;
+  }
+
+  .fc .fc-daygrid-day-frame {
+    min-height: 92px;
+    padding: 4px 2px;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    padding: 0 3px;
+    font-size: 10px;
+  }
+
+  .fc .fc-daygrid-day-number {
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+  }
+
+  .fc .fc-event {
+    min-height: 23px;
+    padding: 4px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 560px) {
+  .fc .fc-daygrid-day-events {
+    margin-top: 4px;
+  }
+
+  .fc .fc-event {
+    min-height: 7px;
+    height: 7px;
+    padding: 0;
+    border-radius: 2px;
+  }
+
+  .fc .fc-event-main {
+    display: none;
+  }
 }
